@@ -4,6 +4,7 @@
 
 #include "../headers/queue.h"
 #include <cstring>
+#include <iostream>
 
 void prepare_array()
 {
@@ -95,13 +96,13 @@ Q* create_queue()
 	*next_available_address_pointer = reinterpret_cast<Q>(&data + 65 * sizeof(Q));
 	Q* queue = nullptr;
 
-	Q pointer = nullptr;
-	for (int i = 0; pointer != nullptr; i++)
+	Q* pointer = nullptr;
+	for (int i = 0; *pointer != nullptr; i++)
 	{
-		Q pointer = reinterpret_cast<Q>(&data + i * sizeof(Q));
+		pointer = reinterpret_cast<Q*>(&data + i * sizeof(Q*));
 	}
 
-	queue = &pointer;
+	queue = pointer;
 
 	return queue;
 }
@@ -225,4 +226,14 @@ void destroy_queue(Q *q)
 
 	*q = nullptr;
 	delete q;	
+}
+
+void on_out_of_memory()
+{
+	std::cout << "Ran out of memory.\n";
+}
+
+void on_illegal_operation()
+{
+	std::cout << "Did something illegal. No such queue or it's empty.\n";
 }
