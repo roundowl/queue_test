@@ -2,16 +2,13 @@
 *   Implements the required functions.
 */
 
-/*	I'll use first two bytes of the provided array to hold the "next available" index.
-*	I'll use std::vector as it's a dynamic array. One vector will hold 
-*/
-
 #include "../headers/queue.h"
+#include <cstring>
 
 void prepare_array()
 {
 	Q* pointer;
-	for (int i; i < 64; i++)
+	for (int i = 0; i < 64; i++)
 	{
 		pointer = reinterpret_cast<Q*>(&data + i * sizeof(Q*));
 		*pointer = nullptr;
@@ -76,7 +73,7 @@ void prepare_array()
 /*	What is where:
 	Q** queue_pointer[0..63] = from &data to &data + 63*sizeof(Q*)
 	Q*	next_available = &data + 64*sizeof(Q*)
-	Q actual data[] = &data + 65*sizeof(Q*) and onwards to &data[2048] inclusive
+	Q actual data[] = &data + 65*sizeof(Q*) and onwards to &data[2047] inclusive
 */
 
 /*	When the queue gets created, the function looks through the
@@ -114,5 +111,24 @@ Q* create_queue()
 
 void enqueue_byte(Q* q, unsigned char b)
 {
-	Q** queue_pointer;
+	Q queue_pointer = *q;
+	Q* next_queue = q + sizeof(Q);
+	Q next_queue_pointer = *next_queue;
+	Q next_available_address = reinterpret_cast<Q>(&data + 64 * sizeof(Q));
+
+	if (next_available_address = &data[2048])
+	{
+		on_out_of_memory();
+		return;
+	}
+	else {
+		memmove(next_queue_pointer + 1, next_queue_pointer, next_available_address - next_queue_pointer);
+		*next_queue_pointer = b;
+		for (Q* queue = q; queue <= &next_available_address; queue = queue + sizeof(Q))
+		{
+			*queue++;
+		}
+		next_available_address++;
+	}
+
 }

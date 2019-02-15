@@ -12,6 +12,8 @@ void enqueue_byte(Q *q, unsigned char b);
 
 unsigned char dequeue_byte(Q *q);
 
+void on_out_of_memory();
+
 unsigned char data[2048];
 
 /*	The idea is to cut the array of chars into sections:
