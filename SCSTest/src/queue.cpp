@@ -29,7 +29,7 @@ void prepare_array()
 *	first section, we can be sure we'll be moving right in the data.
 */
 /*	When the queue gets created, the function looks through the
-*	first section, searching for the next std:nullptr.
+*	first section, searching for the next nullptr.
 *	It then writes the next_available address to the pointer,
 *	which would be the location of the first char of new queue.
 *	The queue pointer itself (Q *q) gets the location of the address
@@ -57,7 +57,13 @@ void prepare_array()
 *	get the next pointer, then subtract the first from second to find
 *	the size, and shift everything into the place of deleted queue.
 *	We then update first section, and the last queue pointer becomes
-*	std::nullptr.
+*	nullptr.
+*	---AMENDED---
+*	As I can't think of a way to update queue variables, and this is
+*	inefficient to update amount_of_queues*2 pointers, I'll leave a nullptr
+*	hole where the queue gets deleted. Next created queue will find this hole
+*	and will live there. It's data will be pushed in-between prev and next queues,
+*	even though it was created later.
 */
 
 /*	What points where:
@@ -77,7 +83,7 @@ void prepare_array()
 */
 
 /*	When the queue gets created, the function looks through the
-*	first section, searching for the next std:nullptr.
+*	first section, searching for the next nullptr.
 *	It then writes the next_available address to the queue pointer,
 *	which would be the location of the first char of new queue.
 *	The pointer in the first section gets the location of the queue
@@ -85,11 +91,12 @@ void prepare_array()
 */
 Q* create_queue()
 {
-	Q next_available_address = reinterpret_cast<Q>(&data + 64 * sizeof(Q));
+	Q* next_available_address_pointer = reinterpret_cast<Q*>(&data + 64 * sizeof(Q));
+	*next_available_address_pointer = reinterpret_cast<Q>(&data + 65 * sizeof(Q));
 	Q* queue = nullptr;
 
-	Q pointer = reinterpret_cast<Q>(&data);
-	for (int i = 1; pointer != nullptr; i++)
+	Q pointer = nullptr;
+	for (int i = 0; pointer != nullptr; i++)
 	{
 		Q pointer = reinterpret_cast<Q>(&data + i * sizeof(Q));
 	}
@@ -131,9 +138,9 @@ void enqueue_byte(Q* q, unsigned char b)
 	else {
 		memmove(next_queue_pointer + 1, next_queue_pointer, next_available_address - next_queue_pointer);
 		*next_queue_pointer = b;
-		for (Q* queue = next_queue; queue <= &next_available_address; queue = queue + sizeof(Q))
+		for (Q* queue = next_queue; queue < &next_available_address; queue = queue + sizeof(Q))
 		{
-			*queue++;
+			if (queue != nullptr) { *queue++; };
 		}
 		next_available_address++;
 	}
@@ -168,9 +175,9 @@ unsigned char dequeue_byte(Q* q)
 	}
 	else {
 		memmove(queue_pointer, queue_pointer + 1, next_available_address - queue_pointer+1);
-		for (Q* queue = next_queue; queue <= &next_available_address; queue = queue + sizeof(Q))
+		for (Q* queue = next_queue; queue < &next_available_address; queue = queue + sizeof(Q))
 		{
-			*queue--;
+		if (queue != nullptr) { *queue--; };
 		}
 		next_available_address--;
 	}
@@ -180,7 +187,17 @@ unsigned char dequeue_byte(Q* q)
 *	get the next pointer, then subtract the first from second to find
 *	the size, and shift everything into the place of deleted queue.
 *	We then update first section, and the last queue pointer becomes
-*	std::nullptr.
+*	nullptr.
+*	---AMENDED---
+*	As I can't think of a way to update queue variables, and this is
+*	inefficient to update amount_of_queues*2 pointers, I'll leave a nullptr
+*	hole where the queue gets deleted. Next created queue will find this hole
+*	and will live there. It's data will be pushed in-between prev and next queues,
+*	even though it was created later.
+*	---FIXME---
+*	This behaviour will create an error if two holes are sequential.
+*	Current solution will think it's the end of pointers.
+*	I will move nullptr check from condition to statement.
 */
 
 void destroy_queue(Q *q)
@@ -190,5 +207,20 @@ void destroy_queue(Q *q)
 		on_illegal_operation();
 		return;
 	}
+	Q queue_pointer = *q;
+	Q* next_queue = q + sizeof(Q);
+	Q next_queue_pointer = *next_queue;
+	Q next_available_address = reinterpret_cast<Q>(&data + 64 * sizeof(Q));
 
+	int size_of_deleted_queue = next_queue_pointer - queue_pointer;
+	memmove(queue_pointer, next_queue_pointer, next_available_address - next_queue_pointer);
+
+	for (Q* queue = next_queue; queue < &next_available_address; queue = queue + sizeof(Q))
+	{
+		if (queue != nullptr) { *queue -= size_of_deleted_queue; };
+	}
+	next_available_address -= size_of_deleted_queue;
+
+	*q = nullptr;
+	delete q;
 }
