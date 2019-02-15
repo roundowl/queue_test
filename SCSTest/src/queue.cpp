@@ -113,12 +113,17 @@ Q* create_queue()
 
 void enqueue_byte(Q* q, unsigned char b)
 {
+	if (q == nullptr)
+	{
+		on_illegal_operation();
+		return;
+	}
 	Q queue_pointer = *q;
 	Q* next_queue = q + sizeof(Q);
 	Q next_queue_pointer = *next_queue;
 	Q next_available_address = reinterpret_cast<Q>(&data + 64 * sizeof(Q));
 
-	if (next_available_address = &data[2048])
+	if (next_available_address == &data[2048])
 	{
 		on_out_of_memory();
 		return;
@@ -144,6 +149,11 @@ void enqueue_byte(Q* q, unsigned char b)
 
 unsigned char dequeue_byte(Q* q)
 {
+	if (q == nullptr)
+	{
+		on_illegal_operation();
+		return;
+	}
 	Q queue_pointer = *q;
 	Q* next_queue = q + sizeof(Q);
 	Q next_queue_pointer = *next_queue;
@@ -151,7 +161,7 @@ unsigned char dequeue_byte(Q* q)
 
 	unsigned char dequeued_byte = *queue_pointer;
 
-	if (next_queue_pointer = queue_pointer)
+	if (next_queue_pointer == queue_pointer)
 	{
 		on_illegal_operation();
 		return;
@@ -175,5 +185,10 @@ unsigned char dequeue_byte(Q* q)
 
 void destroy_queue(Q *q)
 {
+	if (q == nullptr)
+	{
+		on_illegal_operation();
+		return;
+	}
 
 }
