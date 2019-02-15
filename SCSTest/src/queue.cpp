@@ -124,11 +124,43 @@ void enqueue_byte(Q* q, unsigned char b)
 	else {
 		memmove(next_queue_pointer + 1, next_queue_pointer, next_available_address - next_queue_pointer);
 		*next_queue_pointer = b;
-		for (Q* queue = q; queue <= &next_available_address; queue = queue + sizeof(Q))
+		for (Q* queue = next_queue; queue <= &next_available_address; queue = queue + sizeof(Q))
 		{
 			*queue++;
 		}
 		next_available_address++;
 	}
-
 }
+
+/*	When the byte is popped from the queue, we get the queue pointer
+*	from the queue variable, then we pop the byte at which it is
+*	pointing, then we move everything left, starting at the same
+*	address, ending with next_available char. Also updating pointers.
+*	If the next queue pointer is equal to this queue pointer,
+*	then the queue is empty, and we shouldn't pop anything.
+*/
+
+unsigned char dequeue_byte(Q* q)
+{
+	Q queue_pointer = *q;
+	Q* next_queue = q + sizeof(Q);
+	Q next_queue_pointer = *next_queue;
+	Q next_available_address = reinterpret_cast<Q>(&data + 64 * sizeof(Q));
+
+	unsigned char dequeued_byte = *queue_pointer;
+
+	if (next_queue_pointer = queue_pointer)
+	{
+		on_illegal_operation();
+		return;
+	}
+	else {
+		memmove(queue_pointer, queue_pointer + 1, next_available_address - queue_pointer+1);
+		for (Q* queue = next_queue; queue <= &next_available_address; queue = queue + sizeof(Q))
+		{
+			*queue--;
+		}
+		next_available_address--;
+	}
+}
+
