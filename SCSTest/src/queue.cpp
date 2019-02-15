@@ -94,6 +94,8 @@ Q* create_queue()
 		Q pointer = reinterpret_cast<Q>(&data + i * sizeof(Q));
 	}
 
+	queue = &pointer;
+
 	return queue;
 }
 
@@ -164,3 +166,14 @@ unsigned char dequeue_byte(Q* q)
 	}
 }
 
+/*	When the queue gets removed completely, we get it's pointer,
+*	get the next pointer, then subtract the first from second to find
+*	the size, and shift everything into the place of deleted queue.
+*	We then update first section, and the last queue pointer becomes
+*	std::nullptr.
+*/
+
+void destroy_queue(Q *q)
+{
+
+}
