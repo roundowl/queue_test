@@ -1,6 +1,6 @@
 #pragma once
 
-typedef unsigned char Q;
+typedef unsigned char* Q;
 
 void prepare_array();
 

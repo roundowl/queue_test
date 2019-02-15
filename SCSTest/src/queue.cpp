@@ -10,15 +10,14 @@
 
 void prepare_array()
 {
-	//reinterpret_cast<char*>(&variable)
-	Q** pointer;
+	Q* pointer;
 	for (int i; i < 64; i++)
 	{
-		pointer = reinterpret_cast<Q**>(&data + i * sizeof(Q**));
+		pointer = reinterpret_cast<Q*>(&data + i * sizeof(Q*));
 		*pointer = nullptr;
 	}
-	pointer = reinterpret_cast<Q**>(&data + 64 * sizeof(Q*));
-	Q* next_available_address = reinterpret_cast<Q*>(&data + 65 * sizeof(Q**));
+	pointer = reinterpret_cast<Q*>(&data + 64 * sizeof(Q*));
+	Q next_available_address = reinterpret_cast<Q>(&data + 65 * sizeof(Q));
 	*pointer = next_available_address;
 }
 
@@ -89,15 +88,14 @@ void prepare_array()
 */
 Q* create_queue()
 {
-	Q* next_available_address = reinterpret_cast<Q*>(&data + 64 * sizeof(Q**));
-	Q* queue = next_available_address;
+	Q next_available_address = reinterpret_cast<Q>(&data + 64 * sizeof(Q));
+	Q* queue = nullptr;
 
-	Q** pointer = reinterpret_cast<Q**>(&data);
+	Q pointer = reinterpret_cast<Q>(&data);
 	for (int i = 1; pointer != nullptr; i++)
 	{
-		Q** pointer = reinterpret_cast<Q**>(&data + i * sizeof(Q**));
+		Q pointer = reinterpret_cast<Q>(&data + i * sizeof(Q));
 	}
-	pointer = &queue;
 
 	return queue;
 }
@@ -116,5 +114,5 @@ Q* create_queue()
 
 void enqueue_byte(Q* q, unsigned char b)
 {
-
+	Q** queue_pointer;
 }
