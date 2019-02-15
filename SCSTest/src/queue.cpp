@@ -96,8 +96,8 @@ Q* create_queue()
 	*next_available_address_pointer = reinterpret_cast<Q>(&data + 65 * sizeof(Q));
 	Q* queue = nullptr;
 
-	Q* pointer = nullptr;
-	for (int i = 0; *pointer != nullptr; i++)
+	Q* pointer = reinterpret_cast<Q*>(&data + 0 * sizeof(Q*));
+	for (int i = 1; *pointer != nullptr; i++)
 	{
 		pointer = reinterpret_cast<Q*>(&data + i * sizeof(Q*));
 	}
@@ -141,7 +141,7 @@ void enqueue_byte(Q* q, unsigned char b)
 		*next_queue_pointer = b;
 		for (Q* queue = next_queue; queue < &next_available_address; queue = queue + sizeof(Q))
 		{
-			if (queue != nullptr) { *queue++; };
+			if (queue != nullptr) { *queue = *queue + 1; };
 		}
 		next_available_address++;
 	}
@@ -178,7 +178,7 @@ unsigned char dequeue_byte(Q* q)
 		memmove(queue_pointer, queue_pointer + 1, next_available_address - queue_pointer+1);
 		for (Q* queue = next_queue; queue < &next_available_address; queue = queue + sizeof(Q))
 		{
-		if (queue != nullptr) { *queue--; };
+		if (queue != nullptr) { *queue = *queue - 1; };
 		}
 		next_available_address--;
 
