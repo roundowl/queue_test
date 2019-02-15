@@ -159,7 +159,7 @@ unsigned char dequeue_byte(Q* q)
 	if (q == nullptr)
 	{
 		on_illegal_operation();
-		return;
+		return 0;
 	}
 	Q queue_pointer = *q;
 	Q* next_queue = q + sizeof(Q);
@@ -171,7 +171,7 @@ unsigned char dequeue_byte(Q* q)
 	if (next_queue_pointer == queue_pointer)
 	{
 		on_illegal_operation();
-		return;
+		return 0;
 	}
 	else {
 		memmove(queue_pointer, queue_pointer + 1, next_available_address - queue_pointer+1);
@@ -180,6 +180,8 @@ unsigned char dequeue_byte(Q* q)
 		if (queue != nullptr) { *queue--; };
 		}
 		next_available_address--;
+
+		return dequeued_byte;
 	}
 }
 
@@ -222,5 +224,5 @@ void destroy_queue(Q *q)
 	next_available_address -= size_of_deleted_queue;
 
 	*q = nullptr;
-	delete q;
+	delete q;	
 }
