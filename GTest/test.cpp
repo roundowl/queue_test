@@ -1,4 +1,5 @@
 #include "pch.h"
+#include <iostream>
 #include "../SCSTest/src/queue.cpp"
 
 TEST(TestCaseName, TestName) {
@@ -6,7 +7,7 @@ TEST(TestCaseName, TestName) {
 	EXPECT_EQ(*(reinterpret_cast<Q*>(data) + 64), reinterpret_cast<Q>(data) + 65);
 
 	Q *q0 = create_queue();
-	ASSERT_NE(q0, nullptr);
+	EXPECT_NE(q0, nullptr);
 	enqueue_byte(q0, 0);
 	enqueue_byte(q0, 1);
 	EXPECT_EQ(data[65 * sizeof(Q)], 1);

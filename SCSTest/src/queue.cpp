@@ -224,22 +224,25 @@ void destroy_queue(Q *q)
 		on_illegal_operation();
 		return;
 	}
+	Q* next_available_address_pointer = &reinterpret_cast<Q*>(data)[64];
+	Q next_available_address = *next_available_address_pointer;
 	Q queue_pointer = *q;
-	Q* next_queue = q + 1;
-	Q next_queue_pointer = *next_queue;
-	Q next_available_address = &reinterpret_cast<Q>(data)[64];
-
+	Q next_queue_pointer = *(q + 1);
+	if (next_queue_pointer == nullptr) {
+		next_queue_pointer = next_available_address;
+	}
 	int size_of_deleted_queue = next_queue_pointer - queue_pointer;
+
 	memmove(queue_pointer, next_queue_pointer, next_available_address - next_queue_pointer);
 
-	for (Q* queue = next_queue; queue < &next_available_address; queue = queue + 1)
+	for (int i = 1; (q + i) < next_available_address_pointer; i++)
 	{
-		if (queue != nullptr) { *queue -= size_of_deleted_queue; };
+		if (*(q + i) != nullptr) { *(q + i) -= size_of_deleted_queue; }
 	}
 	next_available_address -= size_of_deleted_queue;
+	*next_available_address_pointer = next_available_address;
 
 	*q = nullptr;
-	delete q;	
 }
 
 void on_out_of_memory()
