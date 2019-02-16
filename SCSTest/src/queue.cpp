@@ -172,12 +172,13 @@ unsigned char dequeue_byte(Q* q)
 		on_illegal_operation();
 		return 0;
 	}
+	Q* next_available_address_pointer = &reinterpret_cast<Q*>(data)[64];
+	Q next_available_address = *next_available_address_pointer;
 	Q queue_pointer = *q;
-	Q* next_queue = q + 1;
-	Q next_queue_pointer = *next_queue;
-	Q next_available_address = &reinterpret_cast<Q>(data)[64];
-
-	unsigned char dequeued_byte = *queue_pointer;
+	Q next_queue_pointer = *(q + 1);
+	if (next_queue_pointer == nullptr) {
+		next_queue_pointer = next_available_address;
+	}
 
 	if (next_queue_pointer == queue_pointer)
 	{
@@ -185,12 +186,15 @@ unsigned char dequeue_byte(Q* q)
 		return 0;
 	}
 	else {
-		memmove(queue_pointer, queue_pointer + 1, next_available_address - queue_pointer+1);
-		for (Q* queue = next_queue; queue < &next_available_address; queue = queue + 1)
+		unsigned char dequeued_byte = *queue_pointer;
+		memmove(queue_pointer, queue_pointer + 1, next_available_address - queue_pointer + 1);
+
+		for (int i = 1; (q + i) < next_available_address_pointer; i++)
 		{
-		if (queue != nullptr) { *queue = *queue - 1; };
+			if (*(q + i) != nullptr) { *(q + i) -= 1; }
 		}
 		next_available_address--;
+		*next_available_address_pointer = next_available_address;
 
 		return dequeued_byte;
 	}
