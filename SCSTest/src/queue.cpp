@@ -5,17 +5,18 @@
 #include "../headers/queue.h"
 #include <cstring>
 #include <iostream>
+unsigned char data[2048];
 
 void prepare_array()
 {
 	Q* pointer;
 	for (int i = 0; i < 64; i++)
 	{
-		pointer = reinterpret_cast<Q*>(&data + i * sizeof(Q*));
+		pointer = &reinterpret_cast<Q*>(data)[i];
 		*pointer = nullptr;
 	}
-	pointer = reinterpret_cast<Q*>(&data + 64 * sizeof(Q*));
-	Q next_available_address = reinterpret_cast<Q>(&data + 65 * sizeof(Q));
+	pointer = &reinterpret_cast<Q*>(data)[64];
+	Q next_available_address = reinterpret_cast<Q>(data) + 65 * sizeof(Q);
 	*pointer = next_available_address;
 }
 
@@ -92,17 +93,18 @@ void prepare_array()
 */
 Q* create_queue()
 {
-	Q* next_available_address_pointer = reinterpret_cast<Q*>(&data + 64 * sizeof(Q));
-	*next_available_address_pointer = reinterpret_cast<Q>(&data + 65 * sizeof(Q));
+	Q* next_available_address_pointer = &reinterpret_cast<Q*>(data)[64];
+	//*next_available_address_pointer = reinterpret_cast<Q>(data) + 65*sizeof(Q);
 	Q* queue = nullptr;
 
-	Q* pointer = reinterpret_cast<Q*>(&data + 0 * sizeof(Q*));
+	Q* pointer = reinterpret_cast<Q*>(data);
 	for (int i = 1; *pointer != nullptr; i++)
 	{
-		pointer = reinterpret_cast<Q*>(&data + i * sizeof(Q*));
+		pointer = &reinterpret_cast<Q*>(data)[i];
 	}
 
 	queue = pointer;
+	*pointer = *next_available_address_pointer;
 
 	return queue;
 }
@@ -126,10 +128,13 @@ void enqueue_byte(Q* q, unsigned char b)
 		on_illegal_operation();
 		return;
 	}
+	Q* next_available_address_pointer = &reinterpret_cast<Q*>(data)[64];
+	Q next_available_address = *next_available_address_pointer;
 	Q queue_pointer = *q;
-	Q* next_queue = q + sizeof(Q);
-	Q next_queue_pointer = *next_queue;
-	Q next_available_address = reinterpret_cast<Q>(&data + 64 * sizeof(Q));
+	Q next_queue_pointer = *(q + 1);
+	if (next_queue_pointer == nullptr) {
+		next_queue_pointer = next_available_address;
+	}
 
 	if (next_available_address == &data[2048])
 	{
@@ -139,11 +144,16 @@ void enqueue_byte(Q* q, unsigned char b)
 	else {
 		memmove(next_queue_pointer + 1, next_queue_pointer, next_available_address - next_queue_pointer);
 		*next_queue_pointer = b;
-		for (Q* queue = next_queue; queue < &next_available_address; queue = queue + sizeof(Q))
+		for (int i = 1; (q + i) < next_available_address_pointer; i++)
 		{
-			if (queue != nullptr) { *queue = *queue + 1; };
+			if (*(q + i) != nullptr) { *(q + i) += 1; }
 		}
+		/*for (Q queue = next_queue_pointer; queue < next_available_address; queue = queue + 1)
+		{
+			if (queue != nullptr) { queue = queue + 1; };
+		}*/
 		next_available_address++;
+		*next_available_address_pointer = next_available_address;
 	}
 }
 
@@ -163,9 +173,9 @@ unsigned char dequeue_byte(Q* q)
 		return 0;
 	}
 	Q queue_pointer = *q;
-	Q* next_queue = q + sizeof(Q);
+	Q* next_queue = q + 1;
 	Q next_queue_pointer = *next_queue;
-	Q next_available_address = reinterpret_cast<Q>(&data + 64 * sizeof(Q));
+	Q next_available_address = &reinterpret_cast<Q>(data)[64];
 
 	unsigned char dequeued_byte = *queue_pointer;
 
@@ -176,7 +186,7 @@ unsigned char dequeue_byte(Q* q)
 	}
 	else {
 		memmove(queue_pointer, queue_pointer + 1, next_available_address - queue_pointer+1);
-		for (Q* queue = next_queue; queue < &next_available_address; queue = queue + sizeof(Q))
+		for (Q* queue = next_queue; queue < &next_available_address; queue = queue + 1)
 		{
 		if (queue != nullptr) { *queue = *queue - 1; };
 		}
@@ -211,14 +221,14 @@ void destroy_queue(Q *q)
 		return;
 	}
 	Q queue_pointer = *q;
-	Q* next_queue = q + sizeof(Q);
+	Q* next_queue = q + 1;
 	Q next_queue_pointer = *next_queue;
-	Q next_available_address = reinterpret_cast<Q>(&data + 64 * sizeof(Q));
+	Q next_available_address = &reinterpret_cast<Q>(data)[64];
 
 	int size_of_deleted_queue = next_queue_pointer - queue_pointer;
 	memmove(queue_pointer, next_queue_pointer, next_available_address - next_queue_pointer);
 
-	for (Q* queue = next_queue; queue < &next_available_address; queue = queue + sizeof(Q))
+	for (Q* queue = next_queue; queue < &next_available_address; queue = queue + 1)
 	{
 		if (queue != nullptr) { *queue -= size_of_deleted_queue; };
 	}

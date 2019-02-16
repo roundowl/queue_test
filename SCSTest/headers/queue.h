@@ -16,7 +16,7 @@ void on_out_of_memory();
 
 void on_illegal_operation();
 
-unsigned char data[2048];
+extern unsigned char data[2048];
 
 /*	The idea is to cut the array of chars into sections:
 *	1. 64 pointers to queues (char** array),
