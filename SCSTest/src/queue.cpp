@@ -148,10 +148,6 @@ void enqueue_byte(Q* q, unsigned char b)
 		{
 			if (*(q + i) != nullptr) { *(q + i) += 1; }
 		}
-		/*for (Q queue = next_queue_pointer; queue < next_available_address; queue = queue + 1)
-		{
-			if (queue != nullptr) { queue = queue + 1; };
-		}*/
 		next_available_address++;
 		*next_available_address_pointer = next_available_address;
 	}
@@ -247,10 +243,10 @@ void destroy_queue(Q *q)
 
 void on_out_of_memory()
 {
-	std::cout << "Ran out of memory.\n";
+	throw std::out_of_range("Ran out of memory.\n");
 }
 
 void on_illegal_operation()
 {
-	std::cout << "Did something illegal. No such queue or it's empty.\n";
+	throw std::invalid_argument("Did something illegal. No such queue or it's empty.\n");
 }
